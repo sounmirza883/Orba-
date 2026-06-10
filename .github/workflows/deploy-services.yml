@@ -1,0 +1,27 @@
+name: Deploy Microservices
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['apps/web/**']
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - { name: nexushub-gateway, app: gateway }
+          - { name: nexushub-auth, app: auth-service }
+          - { name: nexushub-community, app: community-service }
+          - { name: nexushub-chat, app: chat-service }
+          - { name: nexushub-membership, app: membership-service }
+          - { name: nexushub-media, app: media-service }
+          - { name: nexushub-notification, app: notification-service }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy ${{ matrix.service.app }} to Railway
+        uses: bervProject/railway-deploy@main
+        with:
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          service: ${{ matrix.service.name }}

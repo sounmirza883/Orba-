@@ -1,0 +1,124 @@
+name: nexushub
+
+x-service-env: &service-env
+  NATS_URL: nats://nats:4222
+  SUPABASE_URL: ${SUPABASE_URL}
+  SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+  SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+
+services:
+  nats:
+    image: nats:2.10-alpine
+    command: ["-js", "-m", "8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  gateway:
+    build: { context: ., dockerfile: apps/gateway/Dockerfile, target: builder }
+    command: pnpm --filter @nexushub/gateway run start:dev
+    ports: ["3000:3000"]
+    environment:
+      <<: *service-env
+      PORT: "3000"
+    volumes:
+      - ./apps/gateway/src:/app/apps/gateway/src
+    depends_on:
+      nats: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+
+  auth-service:
+    build: { context: ., dockerfile: apps/auth-service/Dockerfile, target: builder }
+    command: pnpm --filter @nexushub/auth-service run start:dev
+    environment:
+      <<: *service-env
+      PORT: "3001"
+    volumes:
+      - ./apps/auth-service/src:/app/apps/auth-service/src
+    depends_on:
+      nats: { condition: service_healthy }
+
+  community-service:
+    build: { context: ., dockerfile: apps/community-service/Dockerfile, target: builder }
+    command: pnpm --filter @nexushub/community-service run start:dev
+    environment:
+      <<: *service-env
+      PORT: "3002"
+    volumes:
+      - ./apps/community-service/src:/app/apps/community-service/src
+    depends_on:
+      nats: { condition: service_healthy }
+
+  chat-service:
+    build: { context: ., dockerfile: apps/chat-service/Dockerfile, target: builder }
+    command: pnpm --filter @nexushub/chat-service run start:dev
+    environment:
+      <<: *service-env
+      PORT: "3003"
+    volumes:
+      - ./apps/chat-service/src:/app/apps/chat-service/src
+    depends_on:
+      nats: { condition: service_healthy }
+
+  membership-service:
+    build: { context: ., dockerfile: apps/membership-service/Dockerfile, target: builder }
+    command: pnpm --filter @nexushub/membership-service run start:dev
+    ports: ["3004:3004"]  # exposed for Stripe webhooks via stripe CLI forward
+    environment:
+      <<: *service-env
+      PORT: "3004"
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      BASE_URL: ${BASE_URL}
+    volumes:
+      - ./apps/membership-service/src:/app/apps/membership-service/src
+    depends_on:
+      nats: { condition: service_healthy }
+
+  media-service:
+    build: { context: ., dockerfile: apps/media-service/Dockerfile, target: builder }
+    command: pnpm --filter @nexushub/media-service run start:dev
+    environment:
+      <<: *service-env
+      PORT: "3005"
+    volumes:
+      - ./apps/media-service/src:/app/apps/media-service/src
+    depends_on:
+      nats: { condition: service_healthy }
+
+  notification-service:
+    build: { context: ., dockerfile: apps/notification-service/Dockerfile, target: builder }
+    command: pnpm --filter @nexushub/notification-service run start:dev
+    environment:
+      <<: *service-env
+      PORT: "3006"
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL}
+    volumes:
+      - ./apps/notification-service/src:/app/apps/notification-service/src
+    depends_on:
+      nats: { condition: service_healthy }
+
+  web:
+    build: { context: ., dockerfile: apps/web/Dockerfile, target: builder }
+    command: pnpm --filter @nexushub/web run dev
+    ports: ["3100:3000"]
+    environment:
+      NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      NEXT_PUBLIC_API_URL: http://gateway:3000
+    volumes:
+      - ./apps/web:/app/apps/web
+      - /app/apps/web/node_modules
+      - /app/apps/web/.next
+    depends_on:
+      - gateway

@@ -1,0 +1,110 @@
+name: nexushub-prod
+
+x-service-env: &service-env
+  NATS_URL: nats://nats:4222
+  SUPABASE_URL: ${SUPABASE_URL}
+  SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+  SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+
+x-restart: &restart
+  restart: unless-stopped
+
+services:
+  nats:
+    <<: *restart
+    image: nats:2.10-alpine
+    command: ["-js", "-m", "8222"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  gateway:
+    <<: *restart
+    build: { context: ., dockerfile: apps/gateway/Dockerfile, target: production }
+    ports: ["3000:3000"]
+    environment:
+      <<: *service-env
+      PORT: "3000"
+      NODE_ENV: production
+    depends_on:
+      nats: { condition: service_healthy }
+
+  auth-service:
+    <<: *restart
+    build: { context: ., dockerfile: apps/auth-service/Dockerfile, target: production }
+    environment:
+      <<: *service-env
+      PORT: "3001"
+      NODE_ENV: production
+    depends_on:
+      nats: { condition: service_healthy }
+
+  community-service:
+    <<: *restart
+    build: { context: ., dockerfile: apps/community-service/Dockerfile, target: production }
+    environment:
+      <<: *service-env
+      PORT: "3002"
+      NODE_ENV: production
+    depends_on:
+      nats: { condition: service_healthy }
+
+  chat-service:
+    <<: *restart
+    build: { context: ., dockerfile: apps/chat-service/Dockerfile, target: production }
+    environment:
+      <<: *service-env
+      PORT: "3003"
+      NODE_ENV: production
+    depends_on:
+      nats: { condition: service_healthy }
+
+  membership-service:
+    <<: *restart
+    build: { context: ., dockerfile: apps/membership-service/Dockerfile, target: production }
+    ports: ["3004:3004"]
+    environment:
+      <<: *service-env
+      PORT: "3004"
+      NODE_ENV: production
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      BASE_URL: ${BASE_URL}
+    depends_on:
+      nats: { condition: service_healthy }
+
+  media-service:
+    <<: *restart
+    build: { context: ., dockerfile: apps/media-service/Dockerfile, target: production }
+    environment:
+      <<: *service-env
+      PORT: "3005"
+      NODE_ENV: production
+    depends_on:
+      nats: { condition: service_healthy }
+
+  notification-service:
+    <<: *restart
+    build: { context: ., dockerfile: apps/notification-service/Dockerfile, target: production }
+    environment:
+      <<: *service-env
+      PORT: "3006"
+      NODE_ENV: production
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL}
+    depends_on:
+      nats: { condition: service_healthy }
+
+  web:
+    <<: *restart
+    build: { context: ., dockerfile: apps/web/Dockerfile, target: production }
+    ports: ["3100:3000"]
+    environment:
+      NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NODE_ENV: production
+    depends_on:
+      - gateway
