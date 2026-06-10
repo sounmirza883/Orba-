@@ -28,3 +28,6 @@ coverage/
 
 # Supabase local
 supabase/.temp/
+
+# TS build artifacts
+*.tsbuildinfo
