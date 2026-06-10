@@ -1,0 +1,10 @@
+{
+  "name": "@nexushub/database",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Supabase migrations, RLS policies, and seed data for NexusHub",
+  "scripts": {
+    "lint": "echo 'database: SQL only, nothing to lint'",
+    "typecheck": "echo 'database: SQL only, nothing to typecheck'"
+  }
+}

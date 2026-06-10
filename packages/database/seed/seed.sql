@@ -1,0 +1,28 @@
+-- seed.sql — local development seed data
+-- Run after all migrations + RLS scripts.
+
+INSERT INTO tenants (id, slug, name, accent_color)
+VALUES ('00000000-0000-0000-0000-000000000001', 'demo', 'Demo Community', '#6366F1')
+ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO membership_tiers (id, tenant_id, name, price_cents, is_free)
+VALUES
+  ('00000000-0000-0000-0000-000000000011', '00000000-0000-0000-0000-000000000001', 'Free', 0, true),
+  ('00000000-0000-0000-0000-000000000012', '00000000-0000-0000-0000-000000000001', 'Pro', 2900, false),
+  ('00000000-0000-0000-0000-000000000013', '00000000-0000-0000-0000-000000000001', 'VIP', 9900, false)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO spaces (id, tenant_id, name, slug, description, icon, type, is_private)
+VALUES
+  ('00000000-0000-0000-0000-000000000021', '00000000-0000-0000-0000-000000000001', 'General', 'general', 'Open discussion for everyone', '💬', 'discussion', false),
+  ('00000000-0000-0000-0000-000000000022', '00000000-0000-0000-0000-000000000001', 'Pro Lounge', 'pro-lounge', 'Members-only space for Pro tier', '⭐', 'discussion', true),
+  ('00000000-0000-0000-0000-000000000023', '00000000-0000-0000-0000-000000000001', 'Course: Launch 101', 'launch-101', 'Step-by-step launch course', '🎓', 'course', true)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO space_tier_access (space_id, tier_id)
+VALUES
+  ('00000000-0000-0000-0000-000000000022', '00000000-0000-0000-0000-000000000012'),
+  ('00000000-0000-0000-0000-000000000022', '00000000-0000-0000-0000-000000000013'),
+  ('00000000-0000-0000-0000-000000000023', '00000000-0000-0000-0000-000000000012'),
+  ('00000000-0000-0000-0000-000000000023', '00000000-0000-0000-0000-000000000013')
+ON CONFLICT DO NOTHING;
