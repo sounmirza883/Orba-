@@ -4,9 +4,13 @@ Supabase migrations, RLS policies, and seed data.
 
 ## Apply order
 
-1. `migrations/*.sql` in numeric order (001 → 006)
+1. `migrations/*.sql` in numeric order (001 → 007)
 2. `rls/*.sql` in numeric order (001 → 006)
 3. `seed/seed.sql` (local/dev only)
+
+Migration 007 registers pg_cron jobs that call the Edge Functions in
+`/supabase/functions` — deploy those first and replace `<project-ref>`
+in the SQL before running it.
 
 ## With Supabase CLI
 
