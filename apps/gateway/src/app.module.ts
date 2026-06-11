@@ -11,6 +11,8 @@ import { ChatController } from './routes/chat.controller';
 import { BillingController } from './routes/billing.controller';
 import { UploadsController } from './routes/uploads.controller';
 import { NotificationsController } from './routes/notifications.controller';
+import { CoursesController } from './routes/courses.controller';
+import { EventsController } from './routes/events.controller';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { NotificationsController } from './routes/notifications.controller';
     BillingController,
     UploadsController,
     NotificationsController,
+    CoursesController,
+    EventsController,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

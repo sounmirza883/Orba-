@@ -91,6 +91,19 @@ export const MessagePatterns = {
   COMMENTS_LIST: 'community.comments.list',
   REACTIONS_TOGGLE: 'community.reactions.toggle',
 
+  // community-service: courses
+  COURSE_GET: 'community.courses.get',
+  COURSE_SECTION_CREATE: 'community.courses.sections.create',
+  COURSE_LESSON_CREATE: 'community.courses.lessons.create',
+  COURSE_LESSON_COMPLETE: 'community.courses.lessons.complete',
+  COURSE_PROGRESS_GET: 'community.courses.progress.get',
+
+  // community-service: events
+  EVENTS_LIST: 'community.events.list',
+  EVENTS_CREATE: 'community.events.create',
+  EVENTS_RSVP: 'community.events.rsvp',
+  EVENTS_RSVP_CANCEL: 'community.events.rsvpCancel',
+
   // chat-service
   DM_THREADS_LIST: 'chat.threads.list',
   DM_THREAD_CREATE: 'chat.threads.create',
@@ -109,6 +122,8 @@ export const MessagePatterns = {
   // notification-service
   NOTIFICATIONS_LIST: 'notifications.list',
   NOTIFICATIONS_MARK_READ: 'notifications.markRead',
+  NOTIFICATIONS_PREFS_GET: 'notifications.prefs.get',
+  NOTIFICATIONS_PREFS_UPDATE: 'notifications.prefs.update',
 } as const;
 
 export type MessagePattern = (typeof MessagePatterns)[keyof typeof MessagePatterns];

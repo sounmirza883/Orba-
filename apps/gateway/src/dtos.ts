@@ -148,6 +148,66 @@ export class SignUploadDto {
   bucket!: 'avatars' | 'post-media' | 'course-files';
 }
 
+export class CreateCourseSectionDto {
+  @ApiProperty() @IsString() @IsNotEmpty() @MaxLength(120)
+  title!: string;
+
+  @ApiPropertyOptional() @IsOptional() @IsInt() @Min(0)
+  sortOrder?: number;
+}
+
+export class CreateCourseLessonDto {
+  @ApiProperty() @IsUUID()
+  sectionId!: string;
+
+  @ApiProperty() @IsString() @IsNotEmpty() @MaxLength(120)
+  title!: string;
+
+  @ApiProperty({ enum: ['text', 'video', 'download'] })
+  @IsIn(['text', 'video', 'download'])
+  type!: 'text' | 'video' | 'download';
+
+  @ApiPropertyOptional() @IsOptional() @IsObject()
+  content?: Record<string, unknown>;
+
+  @ApiPropertyOptional() @IsOptional() @IsInt() @Min(0)
+  sortOrder?: number;
+}
+
+export class CreateEventDto {
+  @ApiProperty() @IsString() @IsNotEmpty() @MaxLength(160)
+  title!: string;
+
+  @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(2000)
+  description?: string;
+
+  @ApiProperty({ description: 'ISO 8601 datetime' }) @IsString() @IsNotEmpty()
+  startsAt!: string;
+
+  @ApiPropertyOptional({ description: 'ISO 8601 datetime' }) @IsOptional() @IsString()
+  endsAt?: string;
+
+  @ApiPropertyOptional({ description: 'Zoom/Meet link' }) @IsOptional() @IsUrl()
+  locationUrl?: string;
+
+  @ApiPropertyOptional() @IsOptional() @IsInt() @Min(1)
+  rsvpLimit?: number;
+}
+
+export class UpdateNotificationPrefsDto {
+  @ApiPropertyOptional() @IsOptional() @IsBoolean()
+  emailReplies?: boolean;
+
+  @ApiPropertyOptional() @IsOptional() @IsBoolean()
+  emailMentions?: boolean;
+
+  @ApiPropertyOptional() @IsOptional() @IsBoolean()
+  emailNewPosts?: boolean;
+
+  @ApiPropertyOptional() @IsOptional() @IsBoolean()
+  weeklyDigest?: boolean;
+}
+
 export class CreateDmThreadDto {
   @ApiProperty() @IsUUID()
   recipientId!: string;

@@ -88,3 +88,69 @@ export interface SendDmRequest {
 export interface CreateDmThreadRequest {
   recipientId: string;
 }
+
+export interface CreateCourseSectionRequest {
+  title: string;
+  sortOrder?: number;
+}
+
+export interface CreateCourseLessonRequest {
+  sectionId: string;
+  title: string;
+  type: 'text' | 'video' | 'download';
+  content?: unknown;
+  sortOrder?: number;
+}
+
+export interface CourseOutline {
+  spaceId: string;
+  sections: {
+    id: string;
+    title: string;
+    sort_order: number;
+    lessons: {
+      id: string;
+      title: string;
+      type: 'text' | 'video' | 'download';
+      content: unknown;
+      sort_order: number;
+    }[];
+  }[];
+}
+
+export interface CourseProgress {
+  completedLessonIds: string[];
+  totalLessons: number;
+  percentComplete: number;
+}
+
+export interface CreateEventRequest {
+  title: string;
+  description?: string;
+  startsAt: string;
+  endsAt?: string;
+  locationUrl?: string;
+  rsvpLimit?: number;
+}
+
+export interface EventWithRsvps {
+  id: string;
+  space_id: string;
+  title: string;
+  description: string | null;
+  starts_at: string;
+  ends_at: string | null;
+  location_url: string | null;
+  rsvp_limit: number | null;
+  created_by: string | null;
+  created_at: string;
+  rsvp_count: number;
+  user_has_rsvped: boolean;
+}
+
+export interface UpdateNotificationPreferencesRequest {
+  emailReplies?: boolean;
+  emailMentions?: boolean;
+  emailNewPosts?: boolean;
+  weeklyDigest?: boolean;
+}

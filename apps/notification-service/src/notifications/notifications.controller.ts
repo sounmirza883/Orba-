@@ -27,6 +27,33 @@ export class NotificationsController {
     return { ok: true };
   }
 
+  @MessagePattern(MessagePatterns.NOTIFICATIONS_PREFS_GET)
+  getPrefs(@Payload() data: { userId: string }): Promise<{
+    email_replies: boolean;
+    email_mentions: boolean;
+    email_new_posts: boolean;
+    weekly_digest: boolean;
+  }> {
+    return this.notifications.getFullPreferences(data.userId);
+  }
+
+  @MessagePattern(MessagePatterns.NOTIFICATIONS_PREFS_UPDATE)
+  async updatePrefs(
+    @Payload()
+    data: {
+      userId: string;
+      prefs: {
+        emailReplies?: boolean;
+        emailMentions?: boolean;
+        emailNewPosts?: boolean;
+        weeklyDigest?: boolean;
+      };
+    },
+  ): Promise<{ ok: boolean }> {
+    await this.notifications.updatePreferences(data.userId, data.prefs);
+    return { ok: true };
+  }
+
   // ----- NATS event subscriptions (PRD §9) -----
 
   @EventPattern('comment.created')

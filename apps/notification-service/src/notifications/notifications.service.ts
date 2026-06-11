@@ -116,6 +116,51 @@ export class NotificationsService {
     }
   }
 
+  async getFullPreferences(userId: string): Promise<{
+    email_replies: boolean;
+    email_mentions: boolean;
+    email_new_posts: boolean;
+    weekly_digest: boolean;
+  }> {
+    const { data } = await this.supabase.client
+      .from('notification_preferences')
+      .select('email_replies, email_mentions, email_new_posts, weekly_digest')
+      .eq('user_id', userId)
+      .maybeSingle();
+    return (
+      data ?? {
+        email_replies: true,
+        email_mentions: true,
+        email_new_posts: false,
+        weekly_digest: true,
+      }
+    );
+  }
+
+  async updatePreferences(
+    userId: string,
+    prefs: {
+      emailReplies?: boolean;
+      emailMentions?: boolean;
+      emailNewPosts?: boolean;
+      weeklyDigest?: boolean;
+    },
+  ): Promise<void> {
+    const current = await this.getFullPreferences(userId);
+    const { error } = await this.supabase.client.from('notification_preferences').upsert(
+      {
+        user_id: userId,
+        email_replies: prefs.emailReplies ?? current.email_replies,
+        email_mentions: prefs.emailMentions ?? current.email_mentions,
+        email_new_posts: prefs.emailNewPosts ?? current.email_new_posts,
+        weekly_digest: prefs.weeklyDigest ?? current.weekly_digest,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' },
+    );
+    if (error) throw new Error(error.message);
+  }
+
   private async getPreferences(
     userId: string,
   ): Promise<{ email_replies: boolean; email_mentions: boolean }> {
