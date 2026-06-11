@@ -4,11 +4,15 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import type {
   AppNotification,
   Comment,
+  CourseOutline,
+  CourseProgress,
+  EventWithRsvps,
   MembershipTier,
   PaginatedResult,
   Post,
   Profile,
   Space,
+  UpdateNotificationPreferencesRequest,
 } from '@nexushub/shared-types';
 import { apiFetch } from './client';
 
@@ -87,3 +91,76 @@ export const useNotifications = () =>
     queryFn: () => apiFetch<AppNotification[]>('/notifications'),
     refetchInterval: 60_000,
   });
+
+export const useCourse = (spaceSlug: string) =>
+  useQuery({
+    queryKey: ['course', spaceSlug],
+    queryFn: () => apiFetch<CourseOutline>(`/courses/${spaceSlug}`),
+  });
+
+export const useCourseProgress = (spaceSlug: string) =>
+  useQuery({
+    queryKey: ['course-progress', spaceSlug],
+    queryFn: () => apiFetch<CourseProgress>(`/courses/${spaceSlug}/progress`),
+  });
+
+export const useCompleteLesson = (spaceSlug: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (lessonId: string) =>
+      apiFetch<{ ok: boolean }>(`/courses/lessons/${lessonId}/complete`, { method: 'POST' }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['course-progress', spaceSlug] }),
+  });
+};
+
+export const useSpaceEvents = (spaceSlug: string | null) =>
+  useQuery({
+    queryKey: ['events', spaceSlug],
+    queryFn: () => apiFetch<EventWithRsvps[]>(`/events/${spaceSlug}`),
+    enabled: !!spaceSlug,
+  });
+
+export const useRsvp = (spaceSlug: string | null) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { eventId: string; cancel: boolean }) =>
+      apiFetch<{ ok: boolean }>(`/events/${input.eventId}/rsvp`, {
+        method: input.cancel ? 'DELETE' : 'POST',
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events', spaceSlug] }),
+  });
+};
+
+export const useNotificationPrefs = () =>
+  useQuery({
+    queryKey: ['notification-prefs'],
+    queryFn: () =>
+      apiFetch<{
+        email_replies: boolean;
+        email_mentions: boolean;
+        email_new_posts: boolean;
+        weekly_digest: boolean;
+      }>('/notifications/preferences'),
+  });
+
+export const useUpdateNotificationPrefs = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (prefs: UpdateNotificationPreferencesRequest) =>
+      apiFetch<{ ok: boolean }>('/notifications/preferences', {
+        method: 'PUT',
+        body: JSON.stringify(prefs),
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notification-prefs'] }),
+  });
+};
+
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (update: { displayName?: string; bio?: string; avatarUrl?: string }) =>
+      apiFetch<Profile>('/profiles/me', { method: 'PUT', body: JSON.stringify(update) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['profile', 'me'] }),
+  });
+};

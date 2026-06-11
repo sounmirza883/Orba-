@@ -27,16 +27,32 @@ export function Sidebar() {
         >
           ✉️ Messages
         </Link>
+        <Link
+          href="/events"
+          className={`block rounded-lg px-3 py-2 text-sm ${pathname === '/events' ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'}`}
+        >
+          📅 Events
+        </Link>
+        <Link
+          href="/settings"
+          className={`block rounded-lg px-3 py-2 text-sm ${pathname === '/settings' ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'}`}
+        >
+          ⚙️ Settings
+        </Link>
         <div className="pt-4 text-xs font-semibold uppercase text-foreground/40">Spaces</div>
-        {spaces?.map((space) => (
-          <Link
-            key={space.id}
-            href={`/spaces/${space.slug}`}
-            className={`block rounded-lg px-3 py-2 text-sm ${pathname?.startsWith(`/spaces/${space.slug}`) ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'}`}
-          >
-            {space.icon} {space.name}
-          </Link>
-        ))}
+        {spaces?.map((space) => {
+          const href =
+            space.type === 'course' ? `/courses/${space.slug}` : `/spaces/${space.slug}`;
+          return (
+            <Link
+              key={space.id}
+              href={href}
+              className={`block rounded-lg px-3 py-2 text-sm ${pathname?.startsWith(href) ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'}`}
+            >
+              {space.icon} {space.name}
+            </Link>
+          );
+        })}
         {profile?.is_owner && (
           <>
             <div className="pt-4 text-xs font-semibold uppercase text-foreground/40">Admin</div>
