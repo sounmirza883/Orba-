@@ -164,3 +164,37 @@ export const useUpdateProfile = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['profile', 'me'] }),
   });
 };
+
+export const useCreateSpace = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {
+      name: string;
+      slug: string;
+      description?: string;
+      icon?: string;
+      type?: 'discussion' | 'course' | 'events' | 'directory';
+      isPrivate?: boolean;
+      tierIds?: string[];
+    }) => apiFetch<Space>('/spaces', { method: 'POST', body: JSON.stringify(input) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['spaces'] }),
+  });
+};
+
+export const useDeleteSpace = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (spaceId: string) =>
+      apiFetch<{ ok: boolean }>(`/spaces/${spaceId}`, { method: 'DELETE' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['spaces'] }),
+  });
+};
+
+export const useCreateTier = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { name: string; priceCents: number; interval: 'month' | 'year' }) =>
+      apiFetch<MembershipTier>('/tiers', { method: 'POST', body: JSON.stringify(input) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tiers'] }),
+  });
+};

@@ -62,6 +62,12 @@ export function Sidebar() {
             <Link href="/members" className="block rounded-lg px-3 py-2 text-sm hover:bg-muted">
               👥 Members
             </Link>
+            <Link href="/admin/spaces" className="block rounded-lg px-3 py-2 text-sm hover:bg-muted">
+              🗂 Spaces
+            </Link>
+            <Link href="/admin/tiers" className="block rounded-lg px-3 py-2 text-sm hover:bg-muted">
+              💳 Tiers
+            </Link>
           </>
         )}
       </nav>
