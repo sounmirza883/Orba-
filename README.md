@@ -25,17 +25,17 @@ packages/
 ## Quickstart
 
 ```bash
-# 1. Install dependencies
+./scripts/setup.sh
+```
+
+That checks prerequisites, creates `.env` from the template, and starts the full stack (NATS + 7 services + web). Fill in your Supabase keys and run the SQL in `packages/database/` against your project first — full walkthrough in [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md).
+
+Manual equivalent:
+
+```bash
 pnpm install
-
-# 2. Copy env template and fill in your Supabase/Stripe/Resend keys
-cp .env.example .env
-
-# 3. Apply database migrations to your Supabase project
-#    (via Supabase CLI: supabase db push, or run packages/database/migrations in order)
-
-# 4. Start the full stack (NATS + all services + web)
-docker compose up
+cp .env.example .env   # add Supabase/Stripe/Resend keys
+docker compose up --build
 ```
 
 - Web app: http://localhost:3100
